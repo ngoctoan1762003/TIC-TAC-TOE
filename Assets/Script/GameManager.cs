@@ -8,7 +8,9 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
     public string human, ai;
+    public string[] board = new string[9];
 
+    public int moveIndex;
     public bool isFull=false;
     public bool isEnd = false;
     public GameObject[] grid = new GameObject [9];
@@ -28,7 +30,15 @@ public class GameManager : MonoBehaviour
                 Destroy(gameObject);
             }
         }
-        DontDestroyOnLoad(gameObject);
+        //DontDestroyOnLoad(gameObject);
+    }
+
+    public void LoadBoard()
+    {
+        for(int i=0; i<9; i++)
+        {
+            board[i] = grid[i].gameObject.GetComponentInChildren<Text>().text;
+        }
     }
 
     public void EnableGrid()
@@ -49,73 +59,44 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public bool Compare(GameObject a, GameObject b, GameObject c)
-    {
-        if (a.gameObject.GetComponentInChildren<Text>().text == b.gameObject.GetComponentInChildren<Text>().text
-            && a.gameObject.GetComponentInChildren<Text>().text == c.gameObject.GetComponentInChildren<Text>().text
-            && b.gameObject.GetComponentInChildren<Text>().text == c.gameObject.GetComponentInChildren<Text>().text)
-            return true;
-        else return false;
-    }
-
     public int CheckWinner()
     {
 
         //Horizontal
-        if (Compare(grid[0], grid[1], grid[2]))
+        for(int i=0; i<=6; i += 3)
         {
-            if (grid[0].gameObject.GetComponentInChildren<Text>().text == human) return 1;
-            else if (grid[0].gameObject.GetComponentInChildren<Text>().text == ai) return -1;
-        }
-
-        if (Compare(grid[3], grid[4], grid[5]))
-        {
-            if (grid[3].gameObject.GetComponentInChildren<Text>().text == human) return 1;
-            else if (grid[3].gameObject.GetComponentInChildren<Text>().text == ai) return -1;
-        }
-
-        if (Compare(grid[6], grid[7], grid[8]))
-        {
-            if (grid[6].gameObject.GetComponentInChildren<Text>().text == human) return 1;
-            else if (grid[6].gameObject.GetComponentInChildren<Text>().text == ai) return -1;
+            if (board[i] != board[i + 1]) continue;
+            if (board[i] != board[i + 2]) continue;
+            if (board[i] == ai) return 1;
+            else if (board[i] == human) return -1;
         }
 
         //Vertical
-        if (Compare(grid[0], grid[3], grid[6]))
+        for (int i = 0; i <= 2; i ++)
         {
-            if (grid[0].gameObject.GetComponentInChildren<Text>().text == human) return 1;
-            else if (grid[0].gameObject.GetComponentInChildren<Text>().text == ai) return -1;
-        }
-
-        if (Compare(grid[1], grid[4], grid[7]))
-        {
-            if (grid[1].gameObject.GetComponentInChildren<Text>().text == human) return 1;
-            else if (grid[1].gameObject.GetComponentInChildren<Text>().text == ai) return -1;
-        }
-
-        if (Compare(grid[2], grid[5], grid[8]))
-        {
-            if (grid[2].gameObject.GetComponentInChildren<Text>().text == human) return 1;
-            else if (grid[2].gameObject.GetComponentInChildren<Text>().text == ai) return -1;
+            if (board[i] != board[i + 3]) continue;
+            if (board[i] != board[i + 6]) continue;
+            if (board[i] == ai) return 1;
+            else if (board[i] == human) return -1;
         }
 
         //Diagonal
-        if (Compare(grid[0], grid[4], grid[8]))
+        if (board[0] == board[4] && board[0] == board[8])
         {
-            if (grid[0].gameObject.GetComponentInChildren<Text>().text == human) return 1;
-            else if (grid[0].gameObject.GetComponentInChildren<Text>().text == ai) return -1;
+            if (board[0] == human) return -1;
+            else if (board[0] == ai) return 1;
         }
 
-        if (Compare(grid[2], grid[4], grid[6]))
+        if (board[2] == board[4] && board[2] == board[6])
         {
-            if (grid[2].gameObject.GetComponentInChildren<Text>().text == human) return 1;
-            else if (grid[2].gameObject.GetComponentInChildren<Text>().text == ai) return -1;
+            if (board[2] == human) return -1;
+            else if (board[2] == ai) return 1;
         }
 
-        //Check if there is free space
+        //Check if there is free space, if no then it is Tie
         for (int i = 0; i < 9; i++)
         {
-            if (grid[i].gameObject.GetComponentInChildren<Text>().text == "") break;
+            if (board[i] == "") break;
             if (i == 8) isFull = true;
         }
         if (isFull) return 0;
@@ -127,7 +108,7 @@ public class GameManager : MonoBehaviour
         EnableGrid();
     }
 
-    public void AITurn()
+    /*public void AITurn()
     {
         Debug.Log("ai");
         int i;
@@ -140,12 +121,13 @@ public class GameManager : MonoBehaviour
                 break;
             }
         } while (grid[i].gameObject.GetComponentInChildren<Text>().text != "");
+        LoadBoard();
 
-        if (CheckWinner() == 1)
+        if (CheckWinner() == -1)
         {
             result.text = "You win";
         }
-        else if (CheckWinner() == -1)
+        else if (CheckWinner() == 1)
         {
             result.text = "Noob";
         }
@@ -157,6 +139,69 @@ public class GameManager : MonoBehaviour
         {
             humanTurn();
         }
+    }*/
+
+    public void AITurn()
+    {
+        int bestScore = -1, score;
+        for(int i=0; i<9; i++)
+        {
+            if (board[i] == "") board[i] = ai;
+            board[i] = "";
+            score = Minimax(board, false, -1000, 1000);
+            if (bestScore < score)
+            {
+                bestScore = score;
+                moveIndex = i;
+            }
+            Debug.Log("ok");
+        }
+        grid[moveIndex].GetComponentInChildren<Text>().text = ai;
+        humanTurn();
+    }
+    
+    public int Minimax(string[] b, bool isMaximizing, int alpha, int beta)
+    {
+        int score;
+        if (CheckWinner() != 4) return CheckWinner() * CheckSpaceLeft(b);//AI win return 1, lose return -1, tie return 0, 4 is nothing happen no result, the shorter the loop is, the higher it's score
+
+        //AI turn
+        if (isMaximizing == true)
+        {
+            for(int i=0; i<9; i++)
+            {
+                if (b[i] == "") b[i] = ai;
+                score = Minimax(b, false, -1000, 1000);
+                b[i] = "";
+                if (alpha < score) alpha = score;
+                if (beta < alpha) break;
+            }
+            return alpha;
+        }
+        //Human turn
+        else
+        {
+            for (int i = 0; i < 9; i++)
+            {
+                if (b[i] == "") b[i] = human;
+                score = Minimax(b, true, -1000, 1000);
+                b[i] = "";
+                if (beta > score) beta = score;
+                if (alpha > beta) break;
+            }
+            return beta;
+        }
+
+    }
+
+    public int CheckSpaceLeft(string[] b)
+    {
+        int spaceLeft=0;
+        for(int i=0; i<9; i++)
+        {
+            if (b[i] == "") spaceLeft++;
+        }
+        return spaceLeft + 1;
     }
 
     public void Rematch()

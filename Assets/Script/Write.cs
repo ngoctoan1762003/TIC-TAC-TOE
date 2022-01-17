@@ -10,13 +10,14 @@ public class Write : MonoBehaviour
     {
         gridText.text = GameManager.instance.human;
         GameManager.instance.UnenableGrid();
+        GameManager.instance.LoadBoard();
         if (GameManager.instance.CheckWinner() == 1)
         {
-            GameManager.instance.result.text = "You win";
+            GameManager.instance.result.text = "Noob";
         }
         else if (GameManager.instance.CheckWinner() == -1)
         {
-            GameManager.instance.result.text = "Noob";
+            GameManager.instance.result.text = "You win";
         }
         else if (GameManager.instance.CheckWinner() == 0)
         {
@@ -27,5 +28,4 @@ public class Write : MonoBehaviour
             GameManager.instance.AITurn();
         }
     }
-
 }
