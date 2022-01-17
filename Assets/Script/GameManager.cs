@@ -160,6 +160,7 @@ public class GameManager : MonoBehaviour
             }
         }
         grid[moveIndex].GetComponentInChildren<Text>().text = ai;
+        board[moveIndex] = ai;
         humanTurn();
     }
     
