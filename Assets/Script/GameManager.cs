@@ -12,7 +12,6 @@ public class GameManager : MonoBehaviour
 
     public int moveIndex;
     public bool isFull=false;
-    public bool isEnd = false;
     public GameObject[] grid = new GameObject [9];
 
     public Text result;
@@ -172,28 +171,24 @@ public class GameManager : MonoBehaviour
         //AI turn
         if (isMaximizing == true)
         {
-            int bestScore = -1000;
             for(int i=0; i<9; i++)
             {
                 if (b[i] == "") b[i] = ai;
                 score = Minimax(b, false, -1000, 1000);
                 b[i] = "";
-                bestScore = Mathf.Max(bestScore, score);
                 if (alpha < score) alpha = score;
                 if (beta < alpha) break;
             }
-            return bestScore;
+            return alpha;
         }
         //Human turn
         else
         {
-            int bestScore = 1000;
             for (int i = 0; i < 9; i++)
             {
                 if (b[i] == "") b[i] = human;
                 score = Minimax(b, true, -1000, 1000);
                 b[i] = "";
-                bestScore = Mathf.Min(bestScore, score);
                 if (beta > score) beta = score;
                 if (alpha > beta) break;
             }
