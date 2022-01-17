@@ -144,17 +144,20 @@ public class GameManager : MonoBehaviour
     public void AITurn()
     {
         int bestScore = -1, score;
-        for(int i=0; i<9; i++)
+        for (int i = 0; i < 9; i++)
         {
-            if (board[i] == "") board[i] = ai;
-            board[i] = "";
-            score = Minimax(board, false, -1000, 1000);
-            if (bestScore < score)
+            if (board[i] == "")
             {
-                bestScore = score;
-                moveIndex = i;
+                board[i] = ai;
+                score = Minimax(board, false, -1000, 1000);
+                board[i] = "";
+                if (bestScore < score)
+                {
+                    bestScore = score;
+                    moveIndex = i;
+                }
+                Debug.Log("ok");
             }
-            Debug.Log("ok");
         }
         grid[moveIndex].GetComponentInChildren<Text>().text = ai;
         humanTurn();
@@ -168,24 +171,28 @@ public class GameManager : MonoBehaviour
         //AI turn
         if (isMaximizing == true)
         {
+            int bestScore = -1000;
             for(int i=0; i<9; i++)
             {
                 if (b[i] == "") b[i] = ai;
                 score = Minimax(b, false, -1000, 1000);
                 b[i] = "";
+                bestScore = Mathf.Max(bestScore, score);
                 if (alpha < score) alpha = score;
                 if (beta < alpha) break;
             }
-            return alpha;
+            return bestScore;
         }
         //Human turn
         else
         {
+            int bestScore = 1000;
             for (int i = 0; i < 9; i++)
             {
                 if (b[i] == "") b[i] = human;
                 score = Minimax(b, true, -1000, 1000);
                 b[i] = "";
+                bestScore = Mathf.Min(bestScore, score);
                 if (beta > score) beta = score;
                 if (alpha > beta) break;
             }
