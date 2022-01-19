@@ -96,11 +96,9 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < 9; i++)
         {
             if (board[i] == "") break;
-            if (i == 8) isFull = true;
+            if (i == 8) return 0;
         }
-        if (isFull) return 0;
-
-        else return 4;
+        return 4;
     }
 
     public void humanTurn() {
@@ -142,59 +140,84 @@ public class GameManager : MonoBehaviour
 
     public void AITurn()
     {
-        int bestScore = -1, score;
+        int bestScore = -1000;
         for (int i = 0; i < 9; i++)
         {
             if (board[i] == "")
             {
                 board[i] = ai;
-                score = Minimax(board, false, -1000, 1000);
+                int score = Minimax(board, false, -1000, 1000, 0);
                 board[i] = "";
                 if (bestScore < score)
                 {
                     bestScore = score;
                     moveIndex = i;
+                    //Debug.Log(bestScore);
                 }
-                Debug.Log("ok");
             }
         }
+        Debug.Log(bestScore);
         grid[moveIndex].GetComponentInChildren<Text>().text = ai;
         board[moveIndex] = ai;
-        humanTurn();
+        if (CheckWinner() == -1)
+        {
+            result.text = "You win";
+        }
+        else if (CheckWinner() == 1)
+        {
+            result.text = "Noob";
+        }
+        else if (CheckWinner() == 0)
+        {
+            result.text = "Tie";
+        }
+        else if (CheckWinner() == 4)
+        {
+            humanTurn();
+        }
     }
     
-    public int Minimax(string[] b, bool isMaximizing, int alpha, int beta)
+    public int Minimax(string[] b, bool isMaximizing, int alpha, int beta, int depth)
     {
-        int score;
+        if (CheckWinner() != 4) Debug.Log(CheckWinner() * CheckSpaceLeft(b)+"in the depth" + depth);
         if (CheckWinner() != 4) return CheckWinner() * CheckSpaceLeft(b);//AI win return 1, lose return -1, tie return 0, 4 is nothing happen no result, the shorter the loop is, the higher it's score
 
         //AI turn
         if (isMaximizing == true)
         {
-            for(int i=0; i<9; i++)
+            //int max = -1000;
+            for (int i = 0; i < 9; i++)
             {
-                if (b[i] == "") b[i] = ai;
-                score = Minimax(b, false, -1000, 1000);
-                b[i] = "";
-                if (alpha < score) alpha = score;
-                if (beta < alpha) break;
+                if (b[i] == "")
+                {
+                    b[i] = ai;
+                    int score = Minimax(b, false, alpha, beta, depth + 1);
+                    b[i] = "";
+                    //max = Mathf.Max(max, score);
+                    alpha = Mathf.Max(alpha, score);
+                    if (alpha > beta) break;
+                }
             }
             return alpha;
         }
         //Human turn
         else
         {
+            //int min = 1000;
             for (int i = 0; i < 9; i++)
             {
-                if (b[i] == "") b[i] = human;
-                score = Minimax(b, true, -1000, 1000);
-                b[i] = "";
-                if (beta > score) beta = score;
-                if (alpha > beta) break;
+                if (b[i] == "")
+                {
+                    b[i] = human;
+                    int score = Minimax(b, true, alpha, beta, depth + 1);
+                    b[i] = "";
+                    //min = Mathf.Min(min, score);
+                    beta = Mathf.Min(beta, score);
+                    if (alpha > beta) break;
+                }
             }
             return beta;
         }
-
     }
 
     public int CheckSpaceLeft(string[] b)

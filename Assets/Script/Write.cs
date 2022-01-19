@@ -22,6 +22,7 @@ public class Write : MonoBehaviour
         else if (GameManager.instance.CheckWinner() == 0)
         {
             GameManager.instance.result.text = "Tie";
+            Debug.Log("ok");
         }
         else
         {
