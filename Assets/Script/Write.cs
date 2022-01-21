@@ -13,7 +13,7 @@ public class Write : MonoBehaviour
         GameManager.instance.LoadBoard();
         if (GameManager.instance.CheckWinner() == 1)
         {
-            GameManager.instance.result.text = "Noob";
+            GameManager.instance.result.text = "CON GÀ";
         }
         else if (GameManager.instance.CheckWinner() == -1)
         {

@@ -105,39 +105,6 @@ public class GameManager : MonoBehaviour
         EnableGrid();
     }
 
-    /*public void AITurn()
-    {
-        Debug.Log("ai");
-        int i;
-        do
-        {
-            i = Random.Range(0, 8);
-            if(grid[i].gameObject.GetComponentInChildren<Text>().text == "")
-            {
-                grid[i].gameObject.GetComponentInChildren<Text>().text = ai;
-                break;
-            }
-        } while (grid[i].gameObject.GetComponentInChildren<Text>().text != "");
-        LoadBoard();
-
-        if (CheckWinner() == -1)
-        {
-            result.text = "You win";
-        }
-        else if (CheckWinner() == 1)
-        {
-            result.text = "Noob";
-        }
-        else if (CheckWinner() == 0)
-        {
-            result.text = "Tie";
-        }
-        else if(CheckWinner() == 4)
-        {
-            humanTurn();
-        }
-    }*/
-
     public void AITurn()
     {
         int bestScore = -1000;
@@ -152,7 +119,6 @@ public class GameManager : MonoBehaviour
                 {
                     bestScore = score;
                     moveIndex = i;
-                    //Debug.Log(bestScore);
                 }
             }
         }
@@ -165,7 +131,7 @@ public class GameManager : MonoBehaviour
         }
         else if (CheckWinner() == 1)
         {
-            result.text = "Noob";
+            result.text = "CON GÀ";
         }
         else if (CheckWinner() == 0)
         {
@@ -179,13 +145,11 @@ public class GameManager : MonoBehaviour
     
     public int Minimax(string[] b, bool isMaximizing, int alpha, int beta, int depth)
     {
-        if (CheckWinner() != 4) Debug.Log(CheckWinner() * CheckSpaceLeft(b)+"in the depth" + depth);
         if (CheckWinner() != 4) return CheckWinner() * CheckSpaceLeft(b);//AI win return 1, lose return -1, tie return 0, 4 is nothing happen no result, the shorter the loop is, the higher it's score
 
         //AI turn
         if (isMaximizing == true)
         {
-            //int max = -1000;
             for (int i = 0; i < 9; i++)
             {
                 if (b[i] == "")
@@ -193,7 +157,6 @@ public class GameManager : MonoBehaviour
                     b[i] = ai;
                     int score = Minimax(b, false, alpha, beta, depth + 1);
                     b[i] = "";
-                    //max = Mathf.Max(max, score);
                     alpha = Mathf.Max(alpha, score);
                     if (alpha > beta) break;
                 }
@@ -203,7 +166,6 @@ public class GameManager : MonoBehaviour
         //Human turn
         else
         {
-            //int min = 1000;
             for (int i = 0; i < 9; i++)
             {
                 if (b[i] == "")
@@ -211,7 +173,6 @@ public class GameManager : MonoBehaviour
                     b[i] = human;
                     int score = Minimax(b, true, alpha, beta, depth + 1);
                     b[i] = "";
-                    //min = Mathf.Min(min, score);
                     beta = Mathf.Min(beta, score);
                     if (alpha > beta) break;
                 }
